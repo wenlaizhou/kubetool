@@ -1,0 +1,133 @@
+package kubetool
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/wenlaizhou/k8sTypes"
+)
+
+// 获取资源列表
+func GetResourceList(cluster KubeCluster, resourceName string) (interface{}, error) {
+	res, err := ExecKubectl(cluster, CmdGet, resourceName, "--all-namespaces", "-o", "json")
+	if err != nil {
+		return nil, err
+	}
+	switch resourceName {
+	case "po":
+		resObj := k8sTypes.PodList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "cm":
+		resObj := k8sTypes.ConfigMapList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "ev":
+		resObj := k8sTypes.EventList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "ep":
+		resObj := k8sTypes.EndpointsList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "ns":
+		resObj := k8sTypes.NamespaceList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "pv":
+		resObj := k8sTypes.PersistentVolumeList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "pvc":
+		resObj := k8sTypes.PersistentVolumeClaimList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "svc":
+		resObj := k8sTypes.ServiceList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "ds":
+		resObj := k8sTypes.DaemonSetList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "rs":
+		resObj := k8sTypes.ReplicaSetList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "sts":
+		resObj := k8sTypes.StatefulSetList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "sc":
+		resObj := k8sTypes.StorageClassList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "deploy":
+		resObj := k8sTypes.DeploymentList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "ing":
+		resObj := k8sTypes.IngressList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "secrets":
+		resObj := k8sTypes.SecretList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "sa":
+		resObj := k8sTypes.ServiceAccountList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "clusterroles":
+		resObj := k8sTypes.ClusterRoleList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "clusterrolebindings":
+		resObj := k8sTypes.ClusterRoleBindingList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "roles":
+		resObj := k8sTypes.RoleList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	case "rolebindings":
+		resObj := k8sTypes.RoleBindingList{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
+	}
+	return nil, errors.New(fmt.Sprintf("没有这种资源: %s", resourceName))
+}
+
+func GetResoureYaml(cluster KubeCluster, resourceName string, name string, namespace string) (string, error) {
+	return ExecKubectl(cluster, CmdGet, resourceName, name, "-n", namespace, "-o", "yaml")
+}
+
+func DescResource(cluster KubeCluster, resourceName string, name string, namespace string) (string, error) {
+	return ExecKubectl(cluster, CmdDesc, resourceName, name, "-n", namespace)
+}
+
+func DeleteResource(cluster KubeCluster, resourceName string, name string, namespace string) error {
+	res, err := ExecKubectl(cluster, CmdDelete, resourceName, name, "-n", namespace, "-R", "--wait=false")
+	if err == nil {
+		K8sLogger.InfoF("%s: 删除k8s资源%s %s:%s, 结果为: %s", cluster.Name, resourceName, name, namespace, res)
+	} else {
+		K8sLogger.ErrorF("%s: 删除k8s资源%s %s:%s, 错误: %s, 结果为: %s", cluster.Name, resourceName, name, namespace, err.Error(), res)
+	}
+	return err
+}
+
+// 批量删除资源数据结构
+type DeleteResStruct struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+// 批量删除资源
+func DeleteResourceList(cluster KubeCluster, resourceName string, resources []DeleteResStruct) {
+	for _, res := range resources {
+		resource := res
+		resourceName := resourceName
+		cluster := cluster
+		go DeleteResource(cluster, resourceName, resource.Name, resource.Namespace)
+	}
+}

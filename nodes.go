@@ -3,21 +3,21 @@ package kubetool
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/wenlaizhou/k8sTypes"
+	"github.com/wenlaizhou/kubetype"
 )
 
 // 获取节点列表
 //
 // cluserName 为空, 则获取全部集群node列表
-func GetNodes(clusterName string) map[string]k8sTypes.NodeList {
-	res := make(map[string]k8sTypes.NodeList)
+func GetNodes(clusterName string) map[string]kubetype.NodeList {
+	res := make(map[string]kubetype.NodeList)
 	if len(clusterName) > 0 {
 		cmdRes, err := ExecKubectl(Cluster[clusterName], CmdGet, "no", "-o", "json")
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get node error : %s", clusterName, err.Error())
 			return res
 		}
-		clusterNodes := k8sTypes.NodeList{}
+		clusterNodes := kubetype.NodeList{}
 		err = json.Unmarshal([]byte(cmdRes), &clusterNodes)
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get node error : %s", clusterName, err.Error())
@@ -32,7 +32,7 @@ func GetNodes(clusterName string) map[string]k8sTypes.NodeList {
 			K8sLogger.ErrorF("cluster: %s get node error : %s", n, err.Error())
 			continue
 		}
-		clusterNodes := k8sTypes.NodeList{}
+		clusterNodes := kubetype.NodeList{}
 		err = json.Unmarshal([]byte(cmdRes), &clusterNodes)
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get node error : %s", n, err.Error())

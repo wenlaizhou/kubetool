@@ -3,21 +3,21 @@ package kubetool
 import (
 	"encoding/json"
 
-	"github.com/wenlaizhou/k8sTypes"
+	"github.com/wenlaizhou/kubetype"
 )
 
 // 获取pod列表
 //
 // clusterName为空, 则获取全部集群pod列表
-func GetPods(clusterName string) map[string]k8sTypes.PodList {
-	res := make(map[string]k8sTypes.PodList)
+func GetPods(clusterName string) map[string]kubetype.PodList {
+	res := make(map[string]kubetype.PodList)
 	if len(clusterName) > 0 {
 		cmdRes, err := ExecKubectl(Cluster[clusterName], CmdGet, "po", "-o", "json", "--all-namespaces")
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get pods error : %s", clusterName, err.Error())
 			return res
 		}
-		clusterNodes := k8sTypes.PodList{}
+		clusterNodes := kubetype.PodList{}
 		err = json.Unmarshal([]byte(cmdRes), &clusterNodes)
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get pods error : %s", clusterName, err.Error())
@@ -32,7 +32,7 @@ func GetPods(clusterName string) map[string]k8sTypes.PodList {
 			K8sLogger.ErrorF("cluster: %s get pods error : %s", n, err.Error())
 			continue
 		}
-		clusterNodes := k8sTypes.PodList{}
+		clusterNodes := kubetype.PodList{}
 		err = json.Unmarshal([]byte(cmdRes), &clusterNodes)
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get pods error : %s", n, err.Error())

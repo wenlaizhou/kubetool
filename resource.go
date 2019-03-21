@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/wenlaizhou/k8sTypes"
+	"github.com/wenlaizhou/kubetype"
 )
 
 // 获取资源列表
@@ -15,83 +15,83 @@ func GetResourceList(cluster KubeCluster, resourceName string) (interface{}, err
 	}
 	switch resourceName {
 	case "po":
-		resObj := k8sTypes.PodList{}
+		resObj := kubetype.PodList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "cm":
-		resObj := k8sTypes.ConfigMapList{}
+		resObj := kubetype.ConfigMapList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "ev":
-		resObj := k8sTypes.EventList{}
+		resObj := kubetype.EventList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "ep":
-		resObj := k8sTypes.EndpointsList{}
+		resObj := kubetype.EndpointsList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "ns":
-		resObj := k8sTypes.NamespaceList{}
+		resObj := kubetype.NamespaceList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "pv":
-		resObj := k8sTypes.PersistentVolumeList{}
+		resObj := kubetype.PersistentVolumeList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "pvc":
-		resObj := k8sTypes.PersistentVolumeClaimList{}
+		resObj := kubetype.PersistentVolumeClaimList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "svc":
-		resObj := k8sTypes.ServiceList{}
+		resObj := kubetype.ServiceList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "ds":
-		resObj := k8sTypes.DaemonSetList{}
+		resObj := kubetype.DaemonSetList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "rs":
-		resObj := k8sTypes.ReplicaSetList{}
+		resObj := kubetype.ReplicaSetList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "sts":
-		resObj := k8sTypes.StatefulSetList{}
+		resObj := kubetype.StatefulSetList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "sc":
-		resObj := k8sTypes.StorageClassList{}
+		resObj := kubetype.StorageClassList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "deploy":
-		resObj := k8sTypes.DeploymentList{}
+		resObj := kubetype.DeploymentList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "ing":
-		resObj := k8sTypes.IngressList{}
+		resObj := kubetype.IngressList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "secrets":
-		resObj := k8sTypes.SecretList{}
+		resObj := kubetype.SecretList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "sa":
-		resObj := k8sTypes.ServiceAccountList{}
+		resObj := kubetype.ServiceAccountList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "clusterroles":
-		resObj := k8sTypes.ClusterRoleList{}
+		resObj := kubetype.ClusterRoleList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "clusterrolebindings":
-		resObj := k8sTypes.ClusterRoleBindingList{}
+		resObj := kubetype.ClusterRoleBindingList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "roles":
-		resObj := k8sTypes.RoleList{}
+		resObj := kubetype.RoleList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "rolebindings":
-		resObj := k8sTypes.RoleBindingList{}
+		resObj := kubetype.RoleBindingList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	}

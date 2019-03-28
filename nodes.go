@@ -87,3 +87,8 @@ func UntraintNode(cluster KubeCluster, node string) (string, error) {
 	return ExecKubectl(cluster, Cmdtrait, "nodes", node, fmt.Sprintf("%s-", TraintNodeKey))
 
 }
+
+// 描述所有节点
+func DescAllNodes(cluster KubeCluster) (string, error) {
+	return ExecKubectl(cluster, CmdDesc, "no")
+}

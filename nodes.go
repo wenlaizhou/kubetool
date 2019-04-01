@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/wenlaizhou/kubetype"
+	"regexp"
 )
 
 // 获取节点列表
@@ -88,7 +89,35 @@ func UntraintNode(cluster KubeCluster, node string) (string, error) {
 
 }
 
+// 节点不可调度
+// func UnscheduleNode(cluster KubeCluster, node string) (string, error) {
+//
+// }
+
+// 节点可调度
+// func ScheduleNode(cluster KubeCluster, node string) (string, error) {
+//
+// }
+
+type NodeResource struct {
+	Name    string
+	Limit   map[string]string
+	Request map[string]string
+}
+
+var nodesResourceCache map[KubeCluster]interface{}
+
+var nameReg = regexp.MustCompile("Name:\\s+(\\S+).*")
+var cpuResourceReg = regexp.MustCompile("cpu\\s+(\\w+)\\s+\\((\\w+)%?\\)\\s+(\\w+)\\s+\\((\\w+)%?\\).*")
+var memResourceReg = regexp.MustCompile("memory\\s+(\\w+)\\s+\\((\\w+)%?\\)\\s+(\\w+)\\s+\\((\\w+)%?\\).*")
+
 // 描述所有节点
 func DescAllNodes(cluster KubeCluster) (string, error) {
 	return ExecKubectl(cluster, CmdDesc, "no")
+}
+
+// 获取所有节点的资源信息
+// todo
+func GetAllNodesResource(cluster KubeCluster) []NodeResource {
+	return nil
 }

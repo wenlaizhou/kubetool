@@ -2,6 +2,8 @@ package kubetool
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"github.com/wenlaizhou/kubetype"
 )
@@ -54,8 +56,9 @@ func DescPod(cluster KubeCluster, pod string, ns string) (string, error) {
 }
 
 // 执行pod内部命令
-func ExecPodContainer(cluster KubeCluster, pod string, ns string, containerName string, command []string) (string, error) {
+func ExecPodContainer(cluster KubeCluster, pod string, ns string, containerName string, workDir string, command []string) (string, error) {
 	// k exec openresty-proxy-5c5c498949-4mcn5 -n b1 -c openresty-proxy -i -- echo hello world
+	// kubectl exec dubbo-admin-d97dbfbbd-jrjb2 -n b1 -- sh -c "cd /usr && pwd && ping 10.2.3.4"
 	args := []string{CmdExec}
 	args = append(args, pod)
 	if len(ns) > 0 {
@@ -65,6 +68,12 @@ func ExecPodContainer(cluster KubeCluster, pod string, ns string, containerName 
 		args = append(args, "-c", containerName)
 	}
 	args = append(args, "--")
-	args = append(args, command...)
+	if len(workDir) > 0 {
+		args = append(args, "sh")
+		args = append(args, "-c")
+		args = append(args, fmt.Sprintf("\"cd %s && %s\"", workDir, strings.Join(command, " ")))
+	} else {
+		args = append(args, command...)
+	}
 	return ExecKubectl(cluster, args...)
 }

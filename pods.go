@@ -71,7 +71,7 @@ func ExecPodContainer(cluster KubeCluster, pod string, ns string, containerName 
 	if len(workDir) > 0 {
 		args = append(args, "sh")
 		args = append(args, "-c")
-		args = append(args, fmt.Sprintf("\"cd %s && %s\"", workDir, strings.Join(command, " ")))
+		args = append(args, fmt.Sprintf("cd %s && %s", workDir, strings.Join(command, " ")))
 	} else {
 		args = append(args, command...)
 	}

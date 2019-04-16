@@ -19,6 +19,8 @@ func GetService(cluster KubeCluster, name string, namespace string, selector str
 	args = append(args, "json")
 	if len(namespace) <= 0 {
 		args = append(args, "--all-namespaces")
+	} else {
+		args = append(args, "-n", namespace)
 	}
 	if len(selector) > 0 {
 		args = append(args, fmt.Sprintf("--selector='%s'", selector))

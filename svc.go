@@ -12,33 +12,55 @@ func GetService(cluster KubeCluster, name string, namespace string, selector str
 	var args []string
 	args = append(args, CmdGet)
 	args = append(args, "svc")
-	if len(name) > 0 {
+
+	single := len(name) > 0
+
+	if single {
 		args = append(args, name)
-	}
-	args = append(args, "-o")
-	args = append(args, "json")
-	if len(namespace) <= 0 {
-		args = append(args, "--all-namespaces")
-	} else {
+		if len(namespace) <= 0 { // 单服务需要指定命名空间
+			return res
+		}
 		args = append(args, "-n", namespace)
+	} else {
+		if len(namespace) <= 0 {
+			args = append(args, "--all-namespaces")
+		} else {
+			args = append(args, "-n", namespace)
+		}
 	}
+
 	if len(selector) > 0 {
 		args = append(args, fmt.Sprintf("--selector='%s'", selector))
 	}
 	if len(fieldSelector) > 0 {
 		args = append(args, fmt.Sprintf("--field-selector='%s'", selector))
 	}
+
+	args = append(args, "-o")
+	args = append(args, "json")
+
 	cmdRes, err := ExecKubectl(cluster, args...)
 	if err != nil {
 		K8sLogger.ErrorF("cluster: %s get svc error : %s, name: %s, namespace: %s, selector: %s, fieldSelector: %s",
 			cluster.Name, err.Error(), name, namespace, selector, fieldSelector)
 		return res
 	}
-	err = json.Unmarshal([]byte(cmdRes), &res)
-	if err != nil {
-		K8sLogger.ErrorF("cluster: %s get svc error : %s, name: %s, namespace: %s, selector: %s, fieldSelector: %s",
-			cluster.Name, err.Error(), name, namespace, selector, fieldSelector)
-		return res
+	if single {
+		svc := kubetype.Service{}
+		err = json.Unmarshal([]byte(cmdRes), &svc)
+		res.Items = append(res.Items, svc)
+		if err != nil {
+			K8sLogger.ErrorF("cluster: %s get svc error json parse error : %s, name: %s, namespace: %s, selector: %s, fieldSelector: %s",
+				cluster.Name, err.Error(), name, namespace, selector, fieldSelector)
+			return res
+		}
+	} else {
+		err = json.Unmarshal([]byte(cmdRes), &res)
+		if err != nil {
+			K8sLogger.ErrorF("cluster: %s get svc error json parse error : %s, name: %s, namespace: %s, selector: %s, fieldSelector: %s",
+				cluster.Name, err.Error(), name, namespace, selector, fieldSelector)
+			return res
+		}
 	}
 	return res
 }

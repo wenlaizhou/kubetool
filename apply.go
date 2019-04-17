@@ -31,8 +31,12 @@ func Replace(content string) (string, error) {
 }
 
 // 部署服务
-func Apply(cluster KubeCluster, content string) (string, error) {
+func Apply(cluster KubeCluster, content string, update bool) (string, error) {
 	fileName := fmt.Sprintf("%s/%s/%s.yaml", CurrentDir, DeployYamlPath, time.Now().Format(TimeStr))
 	_, _ = middleware.WriteString(fileName, content)
-	return ExecKubectl(cluster, CmdApply, "-f", fileName)
+	if update {
+		return ExecKubectl(cluster, CmdApply, "-f", fileName, "--prune=true")
+	} else {
+		return ExecKubectl(cluster, CmdApply, "-f", fileName)
+	}
 }

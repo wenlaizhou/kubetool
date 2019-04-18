@@ -35,7 +35,7 @@ func Apply(cluster KubeCluster, content string, update bool) (string, error) {
 	fileName := fmt.Sprintf("%s/%s/%s.yaml", CurrentDir, DeployYamlPath, time.Now().Format(TimeStr))
 	_, _ = middleware.WriteString(fileName, content)
 	if update {
-		return ExecKubectl(cluster, CmdApply, "-f", fileName, "--prune=true", "--all")
+		return ExecKubectl(cluster, CmdApply, "-f", fileName) // , "--prune=true", "--all")
 	} else {
 		return ExecKubectl(cluster, CmdApply, "-f", fileName)
 	}

@@ -24,7 +24,6 @@ var currentDir string
 
 // 初始化配置信息
 func init() {
-
 	currentDir, _ = os.Getwd()
 	if !middleware.Exists("conf") {
 		return

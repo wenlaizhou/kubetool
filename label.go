@@ -14,7 +14,7 @@ func AddLabel(cluster KubeCluster, resourceName string, name string, key string,
 		args = append(args, "-n")
 		args = append(args, ns)
 	}
-	return ExecKubectl(cluster, args...)
+	return KubeApi(cluster, args...)
 }
 
 // 删除标签
@@ -29,5 +29,5 @@ func DeleteLabel(cluster KubeCluster, resourceName string, name string, key stri
 		args = append(args, "-n")
 		args = append(args, ns)
 	}
-	return ExecKubectl(cluster, args...)
+	return KubeApi(cluster, args...)
 }

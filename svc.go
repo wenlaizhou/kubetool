@@ -39,7 +39,7 @@ func GetService(cluster KubeCluster, name string, namespace string, selector str
 	args = append(args, "-o")
 	args = append(args, "json")
 
-	cmdRes, err := ExecKubectl(cluster, args...)
+	cmdRes, err := KubeApi(cluster, args...)
 	if err != nil {
 		K8sLogger.ErrorF("cluster: %s get svc error : %s, name: %s, namespace: %s, selector: %s, fieldSelector: %s",
 			cluster.Name, err.Error(), name, namespace, selector, fieldSelector)

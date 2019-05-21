@@ -14,7 +14,7 @@ import (
 func GetPods(clusterName string) map[string]kubetype.PodList {
 	res := make(map[string]kubetype.PodList)
 	if len(clusterName) > 0 {
-		cmdRes, err := ExecKubectl(Cluster[clusterName], CmdGet, "po", "-o", "json", "--all-namespaces")
+		cmdRes, err := KubeApi(Cluster[clusterName], CmdGet, "po", "-o", "json", "--all-namespaces")
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get pods error : %s", clusterName, err.Error())
 			return res
@@ -29,7 +29,7 @@ func GetPods(clusterName string) map[string]kubetype.PodList {
 		return res
 	}
 	for n, c := range Cluster {
-		cmdRes, err := ExecKubectl(c, CmdGet, "po", "-o", "json", "--all-namespaces")
+		cmdRes, err := KubeApi(c, CmdGet, "po", "-o", "json", "--all-namespaces")
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get pods error : %s", n, err.Error())
 			continue
@@ -47,12 +47,12 @@ func GetPods(clusterName string) map[string]kubetype.PodList {
 
 // 获取pod配置信息
 func GetPod(cluster KubeCluster, pod string, ns string) (string, error) {
-	return ExecKubectl(cluster, "get", "po", pod, "-n", ns, "-o", "yaml")
+	return KubeApi(cluster, "get", "po", pod, "-n", ns, "-o", "yaml")
 }
 
 // 描述pod
 func DescPod(cluster KubeCluster, pod string, ns string) (string, error) {
-	return ExecKubectl(cluster, "describe", "po", pod, "-n", ns, "--recursive=true")
+	return KubeApi(cluster, "describe", "po", pod, "-n", ns, "--recursive=true")
 }
 
 // 执行pod内部命令
@@ -75,5 +75,5 @@ func ExecPodContainer(cluster KubeCluster, pod string, ns string, containerName 
 	} else {
 		args = append(args, command...)
 	}
-	return ExecKubectl(cluster, args...)
+	return KubeApi(cluster, args...)
 }

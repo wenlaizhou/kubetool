@@ -13,7 +13,7 @@ import (
 func GetNodes(clusterName string) map[string]kubetype.NodeList {
 	res := make(map[string]kubetype.NodeList)
 	if len(clusterName) > 0 {
-		cmdRes, err := ExecKubectl(Cluster[clusterName], CmdGet, "no", "-o", "json")
+		cmdRes, err := KubeApi(Cluster[clusterName], CmdGet, "no", "-o", "json")
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get node error : %s", clusterName, err.Error())
 			return res
@@ -28,7 +28,7 @@ func GetNodes(clusterName string) map[string]kubetype.NodeList {
 		return res
 	}
 	for n, c := range Cluster {
-		cmdRes, err := ExecKubectl(c, CmdGet, "no", "-o", "json")
+		cmdRes, err := KubeApi(c, CmdGet, "no", "-o", "json")
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get node error : %s", n, err.Error())
 			continue
@@ -46,22 +46,22 @@ func GetNodes(clusterName string) map[string]kubetype.NodeList {
 
 // 获取节点
 func GetNode(cluster KubeCluster, node string) (string, error) {
-	return ExecKubectl(cluster, CmdGet, "no", node, "-o", "yaml")
+	return KubeApi(cluster, CmdGet, "no", node, "-o", "yaml")
 }
 
 // 获取节点描述
 func DescNode(cluster KubeCluster, node string) (string, error) {
-	return ExecKubectl(cluster, CmdDesc, "no", node, ArgRecursive)
+	return KubeApi(cluster, CmdDesc, "no", node, ArgRecursive)
 }
 
 // 驱逐节点
 func DrainNode(cluster KubeCluster, node string) (string, error) {
-	return ExecKubectl(cluster, CmdDrain, node, "--force=true", "--ignore-daemonsets=true", "--delete-local-data=false")
+	return KubeApi(cluster, CmdDrain, node, "--force=true", "--ignore-daemonsets=true", "--delete-local-data=false")
 }
 
 // 删除节点
 func DeleteNode(cluster KubeCluster, node string) (string, error) {
-	return ExecKubectl(cluster, CmdDelete, "node", node, "--now")
+	return KubeApi(cluster, CmdDelete, "node", node, "--now")
 }
 
 const TraintNodeSpec = "mcloud=deprecated"
@@ -74,7 +74,7 @@ func TraintNode(cluster KubeCluster, node string) (string, error) {
 	// # Update node 'foo' with a taint with key 'dedicated' and value 'special-user' and effect 'NoSchedule'.
 	// # If a taint with that key and effect already exists, its value is replaced as specified.
 	// kubectl taint nodes foo dedicated=special-user:NoSchedule
-	return ExecKubectl(cluster, Cmdtrait, "nodes", node, fmt.Sprintf("%s:NoSchedule", TraintNodeSpec))
+	return KubeApi(cluster, Cmdtrait, "nodes", node, fmt.Sprintf("%s:NoSchedule", TraintNodeSpec))
 
 }
 
@@ -85,7 +85,7 @@ func UntraintNode(cluster KubeCluster, node string) (string, error) {
 	//
 	// # Remove from node 'foo' all the taints with key 'dedicated'
 	// kubectl taint nodes foo dedicated-
-	return ExecKubectl(cluster, Cmdtrait, "nodes", node, fmt.Sprintf("%s-", TraintNodeKey))
+	return KubeApi(cluster, Cmdtrait, "nodes", node, fmt.Sprintf("%s-", TraintNodeKey))
 
 }
 
@@ -113,7 +113,7 @@ var memResourceReg = regexp.MustCompile("memory\\s+(\\w+)\\s+\\((\\w+)%?\\)\\s+(
 
 // 描述所有节点
 func DescAllNodes(cluster KubeCluster) (string, error) {
-	return ExecKubectl(cluster, CmdDesc, "no")
+	return KubeApi(cluster, CmdDesc, "no")
 }
 
 // 获取所有节点的资源信息

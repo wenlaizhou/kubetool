@@ -35,8 +35,8 @@ func Apply(cluster KubeCluster, content string, update bool) (string, error) {
 	fileName := fmt.Sprintf("%s/%s/%s.yaml", CurrentDir, DeployYamlPath, time.Now().Format(TimeStr))
 	_, _ = middleware.WriteString(fileName, content)
 	if update {
-		return ExecKubectl(cluster, CmdApply, "-f", fileName, "--cascade=true") // , "--prune=true", "--all")
+		return KubeApi(cluster, CmdApply, "-f", fileName, "--cascade=true") // , "--prune=true", "--all")
 	} else {
-		return ExecKubectl(cluster, CmdApply, "-f", fileName)
+		return KubeApi(cluster, CmdApply, "-f", fileName)
 	}
 }

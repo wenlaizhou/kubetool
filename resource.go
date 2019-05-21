@@ -9,7 +9,7 @@ import (
 
 // 获取资源列表
 func GetResourceList(cluster KubeCluster, resourceName string) (interface{}, error) {
-	res, err := ExecKubectl(cluster, CmdGet, resourceName, "--all-namespaces", "-o", "json")
+	res, err := KubeApi(cluster, CmdGet, resourceName, "--all-namespaces", "-o", "json")
 	if err != nil {
 		return nil, err
 	}
@@ -99,15 +99,15 @@ func GetResourceList(cluster KubeCluster, resourceName string) (interface{}, err
 }
 
 func GetResoureYaml(cluster KubeCluster, resourceName string, name string, namespace string) (string, error) {
-	return ExecKubectl(cluster, CmdGet, resourceName, name, "-n", namespace, "-o", "yaml")
+	return KubeApi(cluster, CmdGet, resourceName, name, "-n", namespace, "-o", "yaml")
 }
 
 func DescResource(cluster KubeCluster, resourceName string, name string, namespace string) (string, error) {
-	return ExecKubectl(cluster, CmdDesc, resourceName, name, "-n", namespace)
+	return KubeApi(cluster, CmdDesc, resourceName, name, "-n", namespace)
 }
 
 func DeleteResource(cluster KubeCluster, resourceName string, name string, namespace string) error {
-	res, err := ExecKubectl(cluster, CmdDelete, resourceName, name, "-n", namespace, "-R", "--wait=false")
+	res, err := KubeApi(cluster, CmdDelete, resourceName, name, "-n", namespace, "-R", "--wait=false")
 	if err == nil {
 		K8sLogger.InfoF("%s: 删除k8s资源%s %s:%s, 结果为: %s", cluster.Name, resourceName, name, namespace, res)
 	} else {

@@ -1,5 +1,10 @@
 package kubetool
 
+import (
+	"fmt"
+	"github.com/wenlaizhou/middleware"
+)
+
 const Kubectl = "kubectl"
 
 // yaml conf
@@ -53,5 +58,18 @@ const ArgRecursive = "--recursive=true"
 
 const ArgsOverwrite = "--overwrite"
 
-func init() {
+// 进行kubernetes接口调用
+func KubeApi(cluster KubeCluster, commands ...string) (string, error) {
+	cachePath := fmt.Sprintf("--cache-dir=%s", cluster.CachePath)
+	kubeConfig := fmt.Sprintf("--kubeconfig=%s", cluster.ConfPath)
+	var args []string
+	args = append(args, cachePath, kubeConfig)
+	for _, c := range commands {
+		args = append(args, c)
+	}
+	res, err := middleware.ExecCmdWithTimeout(5, Kubectl, args...)
+	if err != nil {
+		K8sLogger.Error(err.Error())
+	}
+	return res, err
 }

@@ -16,21 +16,22 @@ const ExposeTypeLoadBalancer = "LoadBalancer"
 const ExposeTypeExternalName = "ExternalName"
 const typeArg = "--type=%s"
 const externalPortTpl = "--port=%s"
-const saveConfig = "--save-config=%s" // true | false A label selector to use for this service.
-// Only equality-based selector requirements are supported. If empty (the default) infer the selector
-// from the replication controller or replica set.)
+const saveConfig = "--save-config=%s" // true | false
 const targetPort = "--target-port=%s"
 const name = "--name=%s"
 const externalIp = "--external-ip=%s"
 const selectorTpl = "--selector=%s"
 
+// 对外发布服务
+//
+// kind: pod (po), service (svc), replicationcontroller (rc), deployment (deploy), replicaset (rs)
+//
+// resourceName: 当前集群已经存在的资源名称, 可空
+//
+// serviceName: 对外暴露服务的名称
 func Expose(cluster KubeCluster, kind string, resourceName string,
 	serviceName string, ns string, externalPort string, existPort string,
-	nodeIp string,
-	selector string) (string, error) {
-	// ExternalName - Exposes the Service using an arbitrary name
-	// (specified by externalName in the spec) by returning a CNAME
-	// record with the name. No proxy is used. This type requires v1.7 or higher of kube-dns.
+	nodeIp string) (string, error) {
 	var args []string
 	args = append(args, CmdExpose)
 	args = append(args, kind)
@@ -45,8 +46,5 @@ func Expose(cluster KubeCluster, kind string, resourceName string,
 	args = append(args, fmt.Sprintf(externalPortTpl, externalPort))
 	args = append(args, fmt.Sprintf(externalIp, nodeIp))
 	args = append(args, fmt.Sprintf(typeArg, ExposeTypeNodePort))
-	if len(selector) >= 0 {
-		args = append(args, fmt.Sprintf(selectorTpl, selector))
-	}
 	return KubeApi(cluster, args...)
 }

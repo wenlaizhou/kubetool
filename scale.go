@@ -29,7 +29,7 @@ const selectorTpl = "--selector=%s"
 // resourceName: 当前集群已经存在的资源名称, 可空
 //
 // serviceName: 对外暴露服务的名称
-func Expose(cluster KubeCluster, kind string, resourceName string, ns string, externalPort string, existPort string, nodeIp string) (string, error) {
+func Expose(cluster KubeCluster, kind string, resourceName string, ns string, externalPort string, internalPort string, nodeIp string) (string, error) {
 	var args []string
 	args = append(args, CmdExpose)
 	args = append(args, kind)
@@ -41,7 +41,7 @@ func Expose(cluster KubeCluster, kind string, resourceName string, ns string, ex
 	args = append(args, "-n")
 	args = append(args, ns)
 	args = append(args, fmt.Sprintf(name, serviceName))
-	args = append(args, fmt.Sprintf(targetPort, existPort))
+	args = append(args, fmt.Sprintf(targetPort, internalPort))
 	args = append(args, fmt.Sprintf(externalPortTpl, externalPort))
 	args = append(args, fmt.Sprintf(externalIp, nodeIp))
 	args = append(args, fmt.Sprintf(typeArg, ExposeTypeNodePort))

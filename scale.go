@@ -37,7 +37,7 @@ func Expose(cluster KubeCluster, kind string, resourceName string, ns string, ex
 	if len(ns) <= 0 {
 		ns = "default"
 	}
-	serviceName := fmt.Sprintf("ex_%v_%v_%v", kind, resourceName, ns)
+	serviceName := fmt.Sprintf("ex-%v-%v-%v", kind, resourceName, ns)
 	args = append(args, "-n")
 	args = append(args, ns)
 	args = append(args, fmt.Sprintf(name, serviceName))

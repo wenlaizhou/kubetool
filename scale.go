@@ -20,7 +20,7 @@ const saveConfig = "--save-config=%s" // true | false
 const targetPort = "--target-port=%s"
 const name = "--name=%s"
 const externalIp = "--external-ip=%s"
-const selectorTpl = "--selector=%s"
+const selectorTpl = "--selector='%s'"
 
 // 对外发布服务
 //

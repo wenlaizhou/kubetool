@@ -45,6 +45,35 @@ func GetPods(clusterName string) map[string]kubetype.PodList {
 	return res
 }
 
+// pod 查询
+func QueryPods(clusterName string, ns string, selector string) kubetype.PodList {
+	cluster := Cluster[clusterName]
+	var args []string
+	args = append(args, CmdGet)
+	args = append(args, "po")
+	args = append(args, "-o")
+	args = append(args, "json")
+	args = append(args, "-n")
+	if len(ns) <= 0 {
+		ns = "default"
+	}
+	args = append(args, ns)
+	if len(selector) > 0 {
+		args = append(args, fmt.Sprintf(selectorTpl, selector))
+	}
+	res := kubetype.PodList{}
+	cmdRes, err := KubeApi(cluster, args...)
+	if err != nil {
+		K8sLogger.ErrorF("cluster: %s get pods error : %s", err.Error())
+		return res
+	}
+	err = json.Unmarshal([]byte(cmdRes), &res)
+	if err != nil {
+		K8sLogger.ErrorF("cluster: %s get pods error : %s", err.Error())
+	}
+	return res
+}
+
 // 获取pod配置信息
 func GetPod(cluster KubeCluster, pod string, ns string) (string, error) {
 	return KubeApi(cluster, "get", "po", pod, "-n", ns, "-o", "yaml")

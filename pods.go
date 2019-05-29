@@ -11,10 +11,18 @@ import (
 // 获取pod列表
 //
 // clusterName为空, 则获取全部集群pod列表
-func GetPods(clusterName string) map[string]kubetype.PodList {
+func GetPods(clusterName string, ns string) map[string]kubetype.PodList {
 	res := make(map[string]kubetype.PodList)
+	args := []string{
+		CmdGet, "po", "-o", "json",
+	}
+	if len(ns) > 0 {
+		args = append(args, "-n", ns)
+	} else {
+		args = append(args, "--all-namespaces")
+	}
 	if len(clusterName) > 0 {
-		cmdRes, err := KubeApi(Cluster[clusterName], CmdGet, "po", "-o", "json", "--all-namespaces")
+		cmdRes, err := KubeApi(Cluster[clusterName], args...)
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get pods error : %s", clusterName, err.Error())
 			return res
@@ -29,7 +37,7 @@ func GetPods(clusterName string) map[string]kubetype.PodList {
 		return res
 	}
 	for n, c := range Cluster {
-		cmdRes, err := KubeApi(c, CmdGet, "po", "-o", "json", "--all-namespaces")
+		cmdRes, err := KubeApi(c, args...)
 		if err != nil {
 			K8sLogger.ErrorF("cluster: %s get pods error : %s", n, err.Error())
 			continue

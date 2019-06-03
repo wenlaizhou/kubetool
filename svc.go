@@ -7,8 +7,14 @@ import (
 )
 
 // 根据请求参数获取服务列表
-func GetService(cluster KubeCluster, name string, namespace string, selector string, fieldSelector string) kubetype.ServiceList {
+//
+// 改为多集群数据
+func GetService(clusterName string, name string, namespace string, selector string, fieldSelector string) kubetype.ServiceList {
 	res := kubetype.ServiceList{}
+	cluster, hasCluster := Cluster[clusterName]
+	if !hasCluster {
+		return res
+	}
 	var args []string
 	args = append(args, CmdGet)
 	args = append(args, "svc")

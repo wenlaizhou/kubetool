@@ -59,6 +59,6 @@ const ArgsNamespace = "-n"
 const ArgsAllNamespaces = "--all-namespaces"
 
 // output
-const ArgsOutput = "-0"
+const ArgsOutput = "-o"
 const ArgsJson = "json"
 const ArgsYml = "yaml"

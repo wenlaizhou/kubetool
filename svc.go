@@ -8,7 +8,7 @@ import (
 
 // 根据请求参数获取服务列表
 //
-// 改为多集群数据
+// todo 改为多集群数据
 func GetService(clusterName string, name string, namespace string, selector string, fieldSelector string) kubetype.ServiceList {
 	res := kubetype.ServiceList{}
 	cluster, hasCluster := Cluster[clusterName]

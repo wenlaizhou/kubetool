@@ -49,10 +49,16 @@ const CmdResource = "api-resources"
 const CmdApiVersion = "api-versions"
 const CmdVersion = "version"
 
+// args
 const ArgRecursive = "--recursive=true"
-
 const ArgsOverwrite = "--overwrite"
-
 const ArgsAllContainers = "--all-containers=true"
 
+// namespace
 const ArgsNamespace = "-n"
+const ArgsAllNamespaces = "--all-namespaces"
+
+// output
+const ArgsOutput = "-0"
+const ArgsJson = "json"
+const ArgsYml = "yaml"

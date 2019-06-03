@@ -8,8 +8,28 @@ import (
 )
 
 // 获取资源列表
-func GetResourceList(cluster KubeCluster, resourceName string) (interface{}, error) {
-	res, err := KubeApi(cluster, CmdGet, resourceName, "--all-namespaces", "-o", "json")
+func GetResourceList(clusterName string, resourceName string, ns string) (interface{}, error) {
+	if len(resourceName) <= 0 {
+		return nil, errors.New("resourceName 为空")
+	}
+	if len(clusterName) <= 0 {
+		return nil, errors.New("集群参数错误 为空")
+	}
+	cluster, hasData := Cluster[clusterName]
+	if !hasData {
+		return nil, errors.New(fmt.Sprintf("集群参数错误 没有该集群%v", clusterName))
+	}
+	args := []string{
+		CmdGet,
+		resourceName,
+	}
+	if len(ns) > 0 {
+		args = append(args, ArgsNamespace, ns)
+	} else {
+		args = append(args, ArgsAllNamespaces)
+	}
+	args = append(args, ArgsOutput, ArgsJson)
+	res, err := KubeApi(cluster, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,15 +119,15 @@ func GetResourceList(cluster KubeCluster, resourceName string) (interface{}, err
 }
 
 func GetResoureYaml(cluster KubeCluster, resourceName string, name string, namespace string) (string, error) {
-	return KubeApi(cluster, CmdGet, resourceName, name, "-n", namespace, "-o", "yaml")
+	return KubeApi(cluster, CmdGet, resourceName, name, ArgsNamespace, namespace, ArgsOutput, ArgsYml)
 }
 
 func DescResource(cluster KubeCluster, resourceName string, name string, namespace string) (string, error) {
-	return KubeApi(cluster, CmdDesc, resourceName, name, "-n", namespace)
+	return KubeApi(cluster, CmdDesc, resourceName, name, ArgsNamespace, namespace)
 }
 
 func DeleteResource(cluster KubeCluster, resourceName string, name string, namespace string) error {
-	res, err := KubeApi(cluster, CmdDelete, resourceName, name, "-n", namespace, "-R", "--wait=false")
+	res, err := KubeApi(cluster, CmdDelete, resourceName, name, ArgsNamespace, namespace, "-R", "--wait=false")
 	if err == nil {
 		K8sLogger.InfoF("%s: 删除k8s资源%s %s:%s, 结果为: %s", cluster.Name, resourceName, name, namespace, res)
 	} else {

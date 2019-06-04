@@ -3,6 +3,7 @@ package kubetool
 import (
 	"fmt"
 	"github.com/wenlaizhou/middleware"
+	"strings"
 )
 
 // 进行kubernetes接口调用
@@ -19,5 +20,5 @@ func KubeApi(cluster KubeCluster, commands ...string) (string, error) {
 	if err != nil {
 		K8sLogger.Error(err.Error())
 	}
-	return res, err
+	return strings.TrimSpace(res), err
 }

@@ -112,7 +112,20 @@ var cpuResourceReg = regexp.MustCompile("cpu\\s+(\\w+)\\s+\\((\\w+)%?\\)\\s+(\\w
 var memResourceReg = regexp.MustCompile("memory\\s+(\\w+)\\s+\\((\\w+)%?\\)\\s+(\\w+)\\s+\\((\\w+)%?\\).*")
 
 // 描述所有节点
-func DescAllNodes(cluster KubeCluster) (string, error) {
+func DescAllNodes() (map[string]string, error) {
+	result := make(map[string]string)
+	for _, cluster := range Cluster {
+		desc, err := DescClusterNodes(cluster)
+		if err != nil {
+			return result, err
+		}
+		result[cluster.Name] = desc
+	}
+	return result, nil
+}
+
+// 描述集群内的全部节点
+func DescClusterNodes(cluster KubeCluster) (string, error) {
 	return KubeApi(cluster, CmdDesc, "no")
 }
 

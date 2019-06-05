@@ -28,7 +28,12 @@ func init() {
 	if !middleware.Exists("conf") {
 		return
 	}
-	_ = filepath.Walk("conf", walkPath)
+	Init("conf")
+}
+
+// 当前目录进行配置扫描
+func Init(confPath string) {
+	_ = filepath.Walk(confPath, walkPath)
 }
 
 // 漫游配置路径

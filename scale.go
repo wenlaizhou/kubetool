@@ -7,6 +7,7 @@ func Scale(cluster KubeCluster, resourceName string, name string, scaleNumber in
 	args = append(args, CmdScale)
 	args = append(args, fmt.Sprintf("--replicas=%v", scaleNumber))
 	args = append(args, fmt.Sprintf("%v/%v", resourceName, name))
+	args = append(args, fmt.Sprintf("-n %v", ns))
 	return KubeApi(cluster, args...)
 }
 

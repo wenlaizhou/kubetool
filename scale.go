@@ -1,6 +1,10 @@
 package kubetool
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/wenlaizhou/middleware"
+	"regexp"
+)
 
 func Scale(cluster KubeCluster, resourceName string, name string, scaleNumber int, ns string) (string, error) {
 	var args []string
@@ -50,4 +54,62 @@ func Expose(cluster KubeCluster, kind string, exposeName string, resourceName st
 	args = append(args, fmt.Sprintf(externalIp, nodeIp))
 	args = append(args, fmt.Sprintf(typeArg, ExposeTypeNodePort))
 	return KubeApi(cluster, args...)
+}
+
+// 服务暴露
+type ExposeSvc struct {
+	Name      string
+	Namespace string
+	Ip        string
+	Port      string
+	Selector  string
+}
+
+var exposeReg = regexp.MustCompile("^(\\d+)")
+
+// 获取所有对外暴露的服务
+func GetExpose(cluster KubeCluster, ns string) []ExposeSvc {
+
+	var args []string
+	args = append(args, CmdGet)
+	args = append(args, "svc")
+	if len(ns) <= 0 {
+		ns = "default"
+	}
+	args = append(args, "-n")
+	args = append(args, ns)
+	args = append(args, "-o")
+	args = append(args, "wide")
+	res, err := KubeApi(cluster, args...)
+	if err != nil {
+		return nil
+	}
+	tableData := middleware.RenderTable(res)
+	if tableData == nil || len(tableData) <= 0 {
+		return nil
+	}
+	var result []ExposeSvc
+	for _, row := range tableData {
+		svcType := row["TYPE"]
+		if svcType != "NodePort" {
+			continue
+		}
+		externalIp := row["EXTERNAL-IP"]
+		if len(externalIp) <= 0 || externalIp == "<none>" {
+			continue
+		}
+		resRow := ExposeSvc{
+			Ip:        externalIp,
+			Name:      row["NAME"],
+			Namespace: ns,
+			Selector:  row["SELECTOR"],
+		}
+		ports := row["PORT(S)"] // 80:31099/TCP
+		portRes := exposeReg.FindStringSubmatch(ports)
+		if len(portRes) > 1 {
+			resRow.Port = portRes[1]
+		}
+		result = append(result, resRow)
+	}
+	return result
 }

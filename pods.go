@@ -3,10 +3,53 @@ package kubetool
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/wenlaizhou/middleware"
 	"strings"
 
 	"github.com/wenlaizhou/kubetype"
 )
+
+// pod轻量列表
+type PodResource struct {
+	Name   string
+	Status string
+	Age    string
+	IP     string
+	Node   string
+	Ready  string
+}
+
+// 获取pod轻量列表
+func GetPodsLight(cluster KubeCluster, ns string) []PodResource {
+	if len(ns) <= 0 {
+		return nil
+	}
+	args := []string{
+		CmdGet, "po",
+	}
+	args = append(args, "-n", ns, "-o", "wide")
+	cmdRes, err := KubeApi(cluster, args...)
+	if err != nil {
+		return nil
+	}
+	var result []PodResource
+	table := middleware.RenderTable(cmdRes)
+	if len(table) <= 0 {
+		return result
+	}
+	for _, row := range table {
+		rowData := PodResource{
+			Name:   row["NAME"],
+			Status: row["STATUS"],
+			Age:    row["AGE"],
+			IP:     row["IP"],
+			Node:   row["NODE"],
+			Ready:  row["READY"],
+		}
+		result = append(result, rowData)
+	}
+	return result
+}
 
 // 获取pod列表
 //

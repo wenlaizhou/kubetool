@@ -11,12 +11,13 @@ import (
 
 // pod轻量列表
 type PodResource struct {
-	Name   string
-	Status string
-	Age    string
-	IP     string
-	Node   string
-	Ready  string
+	Name     string
+	Status   string
+	Age      string
+	IP       string
+	Node     string
+	Ready    string
+	Restarts string
 }
 
 // 获取pod轻量列表
@@ -39,12 +40,13 @@ func GetPodsLight(cluster KubeCluster, ns string) []PodResource {
 	}
 	for _, row := range table {
 		rowData := PodResource{
-			Name:   row["NAME"],
-			Status: row["STATUS"],
-			Age:    row["AGE"],
-			IP:     row["IP"],
-			Node:   row["NODE"],
-			Ready:  row["READY"],
+			Name:     row["NAME"],
+			Status:   row["STATUS"],
+			Age:      row["AGE"],
+			IP:       row["IP"],
+			Node:     row["NODE"],
+			Ready:    row["READY"],
+			Restarts: row["RESTARTS"],
 		}
 		result = append(result, rowData)
 	}

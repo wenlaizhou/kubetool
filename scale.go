@@ -86,7 +86,7 @@ func GetExpose(cluster KubeCluster, ns string) []ExposeSvc {
 	if err != nil {
 		return nil
 	}
-	tableData := middleware.RenderTable(res)
+	tableData := middleware.RenderTable(res, -1)
 	if tableData == nil || len(tableData) <= 0 {
 		return nil
 	}

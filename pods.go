@@ -135,7 +135,7 @@ func GetPod(cluster KubeCluster, pod string, ns string) (string, error) {
 // 获取pod详细信息
 func GetPodItem(cluster KubeCluster, pod string, ns string) (kubetype.Pod, error) {
 	res := kubetype.Pod{}
-	cmdRes, err := KubeApi(cluster, "", "", pod, "", ns, "-o", "json")
+	cmdRes, err := KubeApi(cluster, "get", "po", pod, "-n", ns, "-o", "json")
 	if err != nil {
 		return res, err
 	}

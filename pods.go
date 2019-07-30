@@ -34,7 +34,7 @@ func GetPodsLight(cluster KubeCluster, ns string) []PodResource {
 		return nil
 	}
 	var result []PodResource
-	table := middleware.RenderTable(cmdRes, 6)
+	table := middleware.RenderTable(cmdRes, 7)
 	if len(table) <= 0 {
 		return result
 	}

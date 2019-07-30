@@ -132,6 +132,21 @@ func GetPod(cluster KubeCluster, pod string, ns string) (string, error) {
 	return KubeApi(cluster, "get", "po", pod, "-n", ns, "-o", "yaml")
 }
 
+// 获取pod详细信息
+func GetPodItem(cluster KubeCluster, pod string, ns string) (kubetype.Pod, error) {
+	res := kubetype.Pod{}
+	cmdRes, err := KubeApi(cluster, "", "", pod, "", ns, "-o", "json")
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal([]byte(cmdRes), &res)
+	if err != nil {
+		K8sLogger.ErrorF("cluster: %s get pods error : %s", err.Error())
+		return res, err
+	}
+	return res, nil
+}
+
 // 描述pod
 func DescPod(cluster KubeCluster, pod string, ns string) (string, error) {
 	return KubeApi(cluster, "describe", "po", pod, "-n", ns, "--recursive=true")

@@ -3,6 +3,7 @@ package kubetool
 import (
 	"errors"
 	"fmt"
+	"github.com/wenlaizhou/yml"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,6 +25,10 @@ type KubeCluster struct {
 var currentDir string
 
 const confDir = "kubeconf"
+
+type KubeYml struct {
+	ApiVersion string `json:"apiVersion"`
+}
 
 // 初始化配置信息
 func init() {
@@ -64,9 +69,14 @@ func JoinCluster(confPath string) error {
 
 // 动态新增集群
 // 集群名称, 集群配置文件
-func NewCluster(name string, conf string) {
+func NewCluster(name string, conf string) error {
 	if len(name) <= 0 || len(conf) <= 0 {
-		return
+		return errors.New("配置数据为空")
+	}
+	confStruct := KubeYml{}
+	err := yml.Unmarshal([]byte(conf), &confStruct)
+	if err != nil {
+		return err
 	}
 	confPath := fmt.Sprintf("%s/%s/%s.config", currentDir, confDir, name)
 	cachePath := fmt.Sprintf("%s/%s/%s/cache", currentDir, confDir, name)

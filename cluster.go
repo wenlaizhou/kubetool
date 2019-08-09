@@ -27,7 +27,8 @@ var currentDir string
 const confDir = "kubeconf"
 
 type KubeYml struct {
-	ApiVersion string `json:"apiVersion"`
+	ApiVersion string `yml:"apiVersion"`
+	Kind       string `yml:"kind"`
 }
 
 // 初始化配置信息
@@ -80,6 +81,7 @@ func NewCluster(name string, conf string) error {
 	}
 	confPath := fmt.Sprintf("%s/%s/%s.config", currentDir, confDir, name)
 	cachePath := fmt.Sprintf("%s/%s/%s/cache", currentDir, confDir, name)
+	K8sLogger.InfoF("创建新集群: %v", name)
 	_, _ = middleware.WriteString(
 		fmt.Sprintf("%s/%s/%s.config", currentDir, confPath, name), conf)
 	Cluster[name] = KubeCluster{
@@ -88,6 +90,7 @@ func NewCluster(name string, conf string) error {
 		CachePath: cachePath,
 		Conf:      conf,
 	}
+	return nil
 }
 
 // 漫游配置路径

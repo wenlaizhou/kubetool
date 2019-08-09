@@ -38,7 +38,7 @@ func init() {
 		middleware.Mkdir(confDir)
 		return
 	}
-	Init("conf")
+	Init(confDir)
 }
 
 // 当前目录进行配置扫描
@@ -95,6 +95,12 @@ func NewCluster(name string, conf string) error {
 
 // 漫游配置路径
 func walkPath(path string, info os.FileInfo, err error) error {
+	if err != nil {
+		return err
+	}
+	if info == nil {
+		return errors.New("file not exist")
+	}
 	if !strings.HasSuffix(info.Name(), ".config") {
 		return nil
 	}

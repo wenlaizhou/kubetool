@@ -46,28 +46,6 @@ func Init(confPath string) {
 	_ = filepath.Walk(confPath, walkPath)
 }
 
-// 加入集群
-// 配置 或者 配置文件路径
-// 集群名称
-func JoinCluster(confPath string) error {
-	clusterName := strings.Replace(confPath, ".config", "", -1)
-	// 重复集群
-	cachePath := fmt.Sprintf("%s/%s/%s/cache", currentDir, confPath, clusterName)
-	// hasCluster, _ := Cluster[clusterName]
-	conf := middleware.ReadString(confPath)
-	if len(conf) <= 0 {
-		return errors.New("配置为空")
-	}
-	Cluster[clusterName] = KubeCluster{
-		Name:      clusterName,
-		ConfPath:  confPath,
-		CachePath: cachePath,
-		Conf:      conf,
-	}
-	middleware.Mkdir(cachePath)
-	return nil
-}
-
 // 动态新增集群
 // 集群名称, 集群配置文件
 func NewCluster(name string, conf string) error {
@@ -79,11 +57,11 @@ func NewCluster(name string, conf string) error {
 	if err != nil {
 		return err
 	}
-	confPath := fmt.Sprintf("%s/%s/%s.config", currentDir, confDir, name)
-	cachePath := fmt.Sprintf("%s/%s/%s/cache", currentDir, confDir, name)
+	confPath := fmt.Sprintf("%s/%s.config", confDir, name)
+	cachePath := fmt.Sprintf("%s/%s/cache", confDir, name)
 	K8sLogger.InfoF("创建新集群: %v", name)
 	_, _ = middleware.WriteString(
-		fmt.Sprintf("%s/%s/%s.config", currentDir, confPath, name), conf)
+		fmt.Sprintf("%s/%s.config", confDir, name), conf)
 	Cluster[name] = KubeCluster{
 		Name:      name,
 		ConfPath:  confPath,
@@ -105,8 +83,8 @@ func walkPath(path string, info os.FileInfo, err error) error {
 		return nil
 	}
 	clusterName := strings.Replace(info.Name(), ".config", "", -1)
-	cachePath := fmt.Sprintf("%s/conf/%s/cache", currentDir, clusterName)
-	confPath := fmt.Sprintf("%s/conf/%s", currentDir, info.Name())
+	cachePath := fmt.Sprintf("conf/%s/cache", clusterName)
+	confPath := fmt.Sprintf("conf/%s", info.Name())
 	conf := middleware.ReadString(path)
 	Cluster[clusterName] = KubeCluster{
 		Name:      clusterName,

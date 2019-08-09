@@ -22,9 +22,7 @@ type KubeCluster struct {
 	Conf      string `json:"conf"`
 }
 
-var currentDir string
-
-const confDir = "kubeconf"
+var confDir = "kubeconf"
 
 type KubeYml struct {
 	ApiVersion string `yml:"apiVersion"`
@@ -33,7 +31,8 @@ type KubeYml struct {
 
 // 初始化配置信息
 func init() {
-	currentDir, _ = os.Getwd()
+	currentDir, _ := os.Getwd()
+	confDir = fmt.Sprintf("%v/%v", currentDir, confDir)
 	if !middleware.Exists(confDir) {
 		middleware.Mkdir(confDir)
 		return
@@ -60,8 +59,7 @@ func NewCluster(name string, conf string) error {
 	confPath := fmt.Sprintf("%s/%s.config", confDir, name)
 	cachePath := fmt.Sprintf("%s/%s/cache", confDir, name)
 	K8sLogger.InfoF("创建新集群: %v", name)
-	_, _ = middleware.WriteString(
-		fmt.Sprintf("%s/%s.config", confDir, name), conf)
+	_, _ = middleware.WriteString(confPath, conf)
 	Cluster[name] = KubeCluster{
 		Name:      name,
 		ConfPath:  confPath,
@@ -83,8 +81,8 @@ func walkPath(path string, info os.FileInfo, err error) error {
 		return nil
 	}
 	clusterName := strings.Replace(info.Name(), ".config", "", -1)
-	cachePath := fmt.Sprintf("conf/%s/cache", clusterName)
-	confPath := fmt.Sprintf("conf/%s", info.Name())
+	cachePath := fmt.Sprintf("%s/%s/cache", confDir, clusterName)
+	confPath := fmt.Sprintf("%s/%s", confDir, info.Name())
 	conf := middleware.ReadString(path)
 	Cluster[clusterName] = KubeCluster{
 		Name:      clusterName,

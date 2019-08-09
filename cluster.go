@@ -1,6 +1,7 @@
 package kubetool
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -22,10 +23,13 @@ type KubeCluster struct {
 
 var currentDir string
 
+const confDir = "kubeconf"
+
 // 初始化配置信息
 func init() {
 	currentDir, _ = os.Getwd()
-	if !middleware.Exists("conf") {
+	if !middleware.Exists(confDir) {
+		middleware.Mkdir(confDir)
 		return
 	}
 	Init("conf")
@@ -42,11 +46,11 @@ func Init(confPath string) {
 func JoinCluster(confPath string) error {
 	clusterName := strings.Replace(confPath, ".config", "", -1)
 	// 重复集群
-	cachePath := fmt.Sprintf("%s/conf/%s/cache", currentDir, clusterName)
+	cachePath := fmt.Sprintf("%s/%s/%s/cache", currentDir, confPath, clusterName)
 	// hasCluster, _ := Cluster[clusterName]
 	conf := middleware.ReadString(confPath)
 	if len(conf) <= 0 {
-
+		return errors.New("配置为空")
 	}
 	Cluster[clusterName] = KubeCluster{
 		Name:      clusterName,
@@ -56,6 +60,24 @@ func JoinCluster(confPath string) error {
 	}
 	middleware.Mkdir(cachePath)
 	return nil
+}
+
+// 动态新增集群
+// 集群名称, 集群配置文件
+func NewCluster(name string, conf string) {
+	if len(name) <= 0 || len(conf) <= 0 {
+		return
+	}
+	confPath := fmt.Sprintf("%s/%s/%s.config", currentDir, confDir, name)
+	cachePath := fmt.Sprintf("%s/%s/%s/cache", currentDir, confDir, name)
+	_, _ = middleware.WriteString(
+		fmt.Sprintf("%s/%s/%s.config", currentDir, confPath, name), conf)
+	Cluster[name] = KubeCluster{
+		Name:      name,
+		ConfPath:  confPath,
+		CachePath: cachePath,
+		Conf:      conf,
+	}
 }
 
 // 漫游配置路径

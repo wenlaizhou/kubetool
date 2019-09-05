@@ -12,7 +12,7 @@ import (
 var CurrentDir string
 
 // 时间格式
-const TimeStr = "2006_1_2_15_04_05"
+const TimeStr = "2006_1_02_15_04_05"
 
 // 文件目录
 const DeployYamlPath = "apply"

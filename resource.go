@@ -126,8 +126,16 @@ func DescResource(cluster KubeCluster, resourceName string, name string, namespa
 	return KubeApi(cluster, CmdDesc, resourceName, name, ArgsNamespace, namespace)
 }
 
-func DeleteResource(cluster KubeCluster, resourceName string, name string, namespace string) error {
-	res, err := KubeApi(cluster, CmdDelete, resourceName, name, ArgsNamespace, namespace, "-R", "--wait=false")
+func DeleteResource(cluster KubeCluster, resourceName string, name string, namespace string, force bool) error {
+
+	args := []string{CmdDelete}
+	args = append(args, resourceName, name, ArgsNamespace, name, "-R", "--wait=false")
+	if force {
+		args = append(args, "--grace-period=0", "--force")
+	}
+	// res, err := KubeApi(cluster, CmdDelete, resourceName, name, ArgsNamespace, namespace, "-R", "--wait=false")
+	res, err := KubeApi(cluster, args...)
+
 	if err == nil {
 		K8sLogger.InfoF("%s: 删除k8s资源%s %s:%s, 结果为: %s", cluster.Name, resourceName, name, namespace, res)
 	} else {

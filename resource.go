@@ -156,6 +156,6 @@ func DeleteResourceList(cluster KubeCluster, resourceName string, resources []De
 		resource := res
 		resourceName := resourceName
 		cluster := cluster
-		go DeleteResource(cluster, resourceName, resource.Name, resource.Namespace)
+		go DeleteResource(cluster, resourceName, resource.Name, resource.Namespace, true)
 	}
 }

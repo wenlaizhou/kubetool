@@ -6,7 +6,7 @@ import (
 	"regexp"
 )
 
-func Scale(cluster KubeCluster, resourceType string, name string, scaleNumber int, ns string) (string, error) {
+func Scale(cluster KubeCluster, resourceType string, name string, ns string, scaleNumber int) (string, error) {
 	var args []string
 	args = append(args, CmdScale)
 	args = append(args, fmt.Sprintf("--replicas=%v", scaleNumber))

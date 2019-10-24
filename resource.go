@@ -129,7 +129,7 @@ func DescResource(cluster KubeCluster, resourceName string, name string, namespa
 func DeleteResource(cluster KubeCluster, resourceName string, name string, namespace string, force bool) error {
 
 	args := []string{CmdDelete}
-	args = append(args, resourceName, name, ArgsNamespace, name, "-R", "--wait=false")
+	args = append(args, resourceName, name, ArgsNamespace, namespace, "-R", "--wait=false")
 	if force {
 		args = append(args, "--grace-period=0", "--force")
 	}

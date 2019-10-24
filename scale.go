@@ -6,11 +6,11 @@ import (
 	"regexp"
 )
 
-func Scale(cluster KubeCluster, resourceName string, name string, scaleNumber int, ns string) (string, error) {
+func Scale(cluster KubeCluster, resourceType string, name string, scaleNumber int, ns string) (string, error) {
 	var args []string
 	args = append(args, CmdScale)
 	args = append(args, fmt.Sprintf("--replicas=%v", scaleNumber))
-	args = append(args, fmt.Sprintf("%v/%v", resourceName, name))
+	args = append(args, fmt.Sprintf("%v/%v", resourceType, name))
 	args = append(args, "-n", ns)
 	return KubeApi(cluster, args...)
 }

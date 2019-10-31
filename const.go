@@ -62,3 +62,17 @@ const ArgsAllNamespaces = "--all-namespaces"
 const ArgsOutput = "-o"
 const ArgsJson = "json"
 const ArgsYml = "yaml"
+
+var resourceTypes = []string{
+	"pod", "service", "deployment", "ns", "ds", "sts", "cm",
+}
+
+// 判断资源类型是否是合法类型
+func IsResourceType(rt string) bool {
+	for _, v := range resourceTypes {
+		if v == rt {
+			return true
+		}
+	}
+	return false
+}

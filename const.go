@@ -69,6 +69,9 @@ var resourceTypes = []string{
 
 // 判断资源类型是否是合法类型
 func IsResourceType(rt string) bool {
+	if len(rt) <= 0 {
+		return false
+	}
 	for _, v := range resourceTypes {
 		if v == rt {
 			return true

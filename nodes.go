@@ -166,7 +166,7 @@ func DescAllNodes(clusterName string) (kubetype.NodeList, error) {
 	if !success {
 		return result, errors.New("不存在该集群")
 	}
-	res, err := KubeApi(cluster, "get", "no", "-o", "wide")
+	res, err := KubeApi(cluster, "get", "no", "-o", "json")
 	if err != nil {
 		return result, err
 	}

@@ -2,9 +2,11 @@ package kubetool
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/wenlaizhou/kubetype"
 	"regexp"
+	"strings"
 )
 
 // 获取节点列表
@@ -105,24 +107,88 @@ type NodeResource struct {
 	Request map[string]string
 }
 
+// 节点描述对象
+type NodeDesc struct {
+	Name             string
+	Status           string
+	Roles            string
+	Age              string
+	Version          string
+	InternalIp       string
+	ExternalIp       string
+	Os               string
+	Kernel           string
+	ContainerRuntime string
+}
+
 var nodesResourceCache map[KubeCluster]interface{}
 
 var nameReg = regexp.MustCompile("Name:\\s+(\\S+).*")
 var cpuResourceReg = regexp.MustCompile("cpu\\s+(\\w+)\\s+\\((\\w+)%?\\)\\s+(\\w+)\\s+\\((\\w+)%?\\).*")
 var memResourceReg = regexp.MustCompile("memory\\s+(\\w+)\\s+\\((\\w+)%?\\)\\s+(\\w+)\\s+\\((\\w+)%?\\).*")
 
-// 描述所有节点
-func DescAllNodes() (map[string]string, error) {
-	result := make(map[string]string)
-	for _, cluster := range Cluster {
-		desc, err := DescClusterNodes(cluster)
-		if err != nil {
-			return result, err
-		}
-		result[cluster.Name] = desc
+func DescNodes(clusterName string) ([]NodeDesc, error) {
+	cluster, success := Cluster[clusterName]
+	if !success {
+		return nil, errors.New("不存在该集群")
+	}
+	res, err := KubeApi(cluster, "get", "no", "-o", "wide")
+	if err != nil {
+		return nil, err
+	}
+	var result []NodeDesc
+	res = strings.TrimSpace(res)
+	nodes := strings.Split(res, "\n")
+	nodes = nodes[1:]
+	for _, node := range nodes {
+		fields := strings.Fields(node)
+		nodeDesc := NodeDesc{}
+		// NAME STATUS ROLES AGE VERSION INTERNAL-IP EXTERNAL-IP OS-IMAGE KERNEL-VERSION CONTAINER-RUNTIME
+		nodeDesc.Name = fields[0]
+		nodeDesc.Status = fields[1]
+		nodeDesc.Roles = fields[2]
+		nodeDesc.Age = fields[3]
+		nodeDesc.Version = fields[4]
+		nodeDesc.InternalIp = fields[5]
+		nodeDesc.ExternalIp = fields[6]
+		nodeDesc.Os = fields[7]
+		nodeDesc.Kernel = fields[8]
+		nodeDesc.ContainerRuntime = fields[9]
+		result = append(result, nodeDesc)
 	}
 	return result, nil
 }
+
+// 获取集群全部节点描述
+func DescAllNodes(clusterName string) (kubetype.NodeList, error) {
+	result := kubetype.NodeList{}
+	cluster, success := Cluster[clusterName]
+	if !success {
+		return result, errors.New("不存在该集群")
+	}
+	res, err := KubeApi(cluster, "get", "no", "-o", "wide")
+	if err != nil {
+		return result, err
+	}
+	err = json.Unmarshal([]byte(strings.TrimSpace(res)), &result)
+	if err != nil {
+		return result, err
+	}
+	return result, nil
+}
+
+// // 描述所有节点
+// func DescAllNodes() (map[string]string, error) {
+// 	result := make(map[string]string)
+// 	for _, cluster := range Cluster {
+// 		desc, err := DescClusterNodes(cluster)
+// 		if err != nil {
+// 			return result, err
+// 		}
+// 		result[cluster.Name] = desc
+// 	}
+// 	return result, nil
+// }
 
 // 描述集群内的全部节点
 func DescClusterNodes(cluster KubeCluster) (string, error) {

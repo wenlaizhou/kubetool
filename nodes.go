@@ -111,6 +111,7 @@ type NodeResource struct {
 // 节点描述对象
 type NodeDesc struct {
 	Name           string
+	Cluster        string
 	Hostname       string
 	Ip             string
 	Labels         []string
@@ -216,6 +217,7 @@ func GetNodeStruct(clusterName string, name string) NodeDesc {
 	result := NodeDesc{}
 
 	result.Name = structs["Name"][0]
+	result.Cluster = clusterName
 	result.Kernel = strings.TrimSpace(strings.Split(structs["System Info"][3], ":")[1])
 	result.PodCIDR = structs["PodCIDR"][0]
 	result.PodCount, _ = strconv.Atoi(numb.FindAllStringSubmatch(structs["Non-terminated Pods"][0], -1)[0][0])

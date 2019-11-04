@@ -159,23 +159,37 @@ func DescNodes(clusterName string) ([]NodeDesc, error) {
 	return result, nil
 }
 
-// 获取集群全部节点描述
-func DescAllNodes(clusterName string) (kubetype.NodeList, error) {
-	result := kubetype.NodeList{}
-	cluster, success := Cluster[clusterName]
-	if !success {
-		return result, errors.New("不存在该集群")
-	}
-	res, err := KubeApi(cluster, "get", "no", "-o", "json")
+func GetNodesName(clusterName string) []string {
+	res, err := KubeApi(Cluster[clusterName], "get", "no")
 	if err != nil {
-		return result, err
+		return nil
 	}
-	err = json.Unmarshal([]byte(strings.TrimSpace(res)), &result)
-	if err != nil {
-		return result, err
+	res = strings.TrimSpace(res)
+	var result []string
+	for _, line := range strings.Split(res, "\n")[1:] {
+		result = append(result, strings.Fields(strings.TrimSpace(line))[0])
 	}
-	return result, nil
+	return result
 }
+
+//
+// // 获取集群全部节点描述
+// func DescAllNodes(clusterName string) (kubetype.NodeList, error) {
+// 	result := kubetype.NodeList{}
+// 	cluster, success := Cluster[clusterName]
+// 	if !success {
+// 		return result, errors.New("不存在该集群")
+// 	}
+// 	res, err := KubeApi(cluster, "get", "no", "-o", "json")
+// 	if err != nil {
+// 		return result, err
+// 	}
+// 	err = json.Unmarshal([]byte(strings.TrimSpace(res)), &result)
+// 	if err != nil {
+// 		return result, err
+// 	}
+// 	return result, nil
+// }
 
 // // 描述所有节点
 // func DescAllNodes() (map[string]string, error) {

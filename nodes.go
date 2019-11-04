@@ -2,11 +2,12 @@ package kubetool
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/wenlaizhou/kubetype"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // 获取节点列表
@@ -109,16 +110,20 @@ type NodeResource struct {
 
 // 节点描述对象
 type NodeDesc struct {
-	Name             string
-	Status           string
-	Roles            string
-	Age              string
-	Version          string
-	InternalIp       string
-	ExternalIp       string
-	Os               string
-	Kernel           string
-	ContainerRuntime string
+	Name           string
+	Hostname       string
+	Ip             string
+	Labels         []string
+	Annotations    []string
+	PodCount       int
+	CpuLimit       int
+	MemoryLimit    int
+	CapacityCpu    int
+	CapacityMemory int
+	PodCIDR        string
+	Kernel         string
+	Status         string
+	CreateTime     time.Time
 }
 
 var nodesResourceCache map[KubeCluster]interface{}
@@ -127,37 +132,38 @@ var nameReg = regexp.MustCompile("Name:\\s+(\\S+).*")
 var cpuResourceReg = regexp.MustCompile("cpu\\s+(\\w+)\\s+\\((\\w+)%?\\)\\s+(\\w+)\\s+\\((\\w+)%?\\).*")
 var memResourceReg = regexp.MustCompile("memory\\s+(\\w+)\\s+\\((\\w+)%?\\)\\s+(\\w+)\\s+\\((\\w+)%?\\).*")
 
-func DescNodes(clusterName string) ([]NodeDesc, error) {
-	cluster, success := Cluster[clusterName]
-	if !success {
-		return nil, errors.New("不存在该集群")
-	}
-	res, err := KubeApi(cluster, "get", "no", "-o", "wide")
-	if err != nil {
-		return nil, err
-	}
-	var result []NodeDesc
-	res = strings.TrimSpace(res)
-	nodes := strings.Split(res, "\n")
-	nodes = nodes[1:]
-	for _, node := range nodes {
-		fields := strings.Fields(node)
-		nodeDesc := NodeDesc{}
-		// NAME STATUS ROLES AGE VERSION INTERNAL-IP EXTERNAL-IP OS-IMAGE KERNEL-VERSION CONTAINER-RUNTIME
-		nodeDesc.Name = fields[0]
-		nodeDesc.Status = fields[1]
-		nodeDesc.Roles = fields[2]
-		nodeDesc.Age = fields[3]
-		nodeDesc.Version = fields[4]
-		nodeDesc.InternalIp = fields[5]
-		nodeDesc.ExternalIp = fields[6]
-		nodeDesc.Os = fields[7]
-		nodeDesc.Kernel = fields[8]
-		nodeDesc.ContainerRuntime = fields[9]
-		result = append(result, nodeDesc)
-	}
-	return result, nil
-}
+//
+// func DescNodes(clusterName string) ([]NodeDesc, error) {
+// 	cluster, success := Cluster[clusterName]
+// 	if !success {
+// 		return nil, errors.New("不存在该集群")
+// 	}
+// 	res, err := KubeApi(cluster, "get", "no", "-o", "wide")
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	var result []NodeDesc
+// 	res = strings.TrimSpace(res)
+// 	nodes := strings.Split(res, "\n")
+// 	nodes = nodes[1:]
+// 	for _, node := range nodes {
+// 		fields := strings.Fields(node)
+// 		nodeDesc := NodeDesc{}
+// 		// NAME STATUS ROLES AGE VERSION INTERNAL-IP EXTERNAL-IP OS-IMAGE KERNEL-VERSION CONTAINER-RUNTIME
+// 		nodeDesc.Name = fields[0]
+// 		nodeDesc.Status = fields[1]
+// 		nodeDesc.Roles = fields[2]
+// 		nodeDesc.Age = fields[3]
+// 		nodeDesc.Version = fields[4]
+// 		nodeDesc.InternalIp = fields[5]
+// 		nodeDesc.ExternalIp = fields[6]
+// 		nodeDesc.Os = fields[7]
+// 		nodeDesc.Kernel = fields[8]
+// 		nodeDesc.ContainerRuntime = fields[9]
+// 		result = append(result, nodeDesc)
+// 	}
+// 	return result, nil
+// }
 
 func GetNodesName(clusterName string) []string {
 	res, err := KubeApi(Cluster[clusterName], "get", "no")
@@ -169,6 +175,77 @@ func GetNodesName(clusterName string) []string {
 	for _, line := range strings.Split(res, "\n")[1:] {
 		result = append(result, strings.Fields(strings.TrimSpace(line))[0])
 	}
+	return result
+}
+
+func GetNodeStruct(clusterName string, name string) NodeDesc {
+
+	desc, err := KubeApi(Cluster[clusterName], "describe", "no", name)
+	if err != nil {
+		return NodeDesc{}
+	}
+
+	desc = strings.TrimSpace(desc)
+
+	structs := make(map[string][]string)
+
+	currentKey := ""
+
+	reg := regexp.MustCompile("^\\s+")
+	numb := regexp.MustCompile("(\\d+)")
+
+	for _, line := range strings.Split(desc, "\n") {
+		if len(line) <= 0 {
+			continue
+		}
+		if reg.MatchString(line) {
+			structs[currentKey] = append(structs[currentKey], strings.TrimSpace(line))
+		} else {
+			currentKey = strings.TrimSpace(line)
+			kv := strings.Split(currentKey, ":")
+			if len(kv) > 1 && len(kv[1]) > 0 {
+				currentKey = kv[0]
+				structs[currentKey] = []string{strings.TrimSpace(strings.Join(kv[1:], ":"))}
+			} else {
+				currentKey = strings.Replace(currentKey, ":", "", -1)
+				structs[currentKey] = []string{}
+			}
+		}
+	}
+
+	result := NodeDesc{}
+
+	result.Name = structs["Name"][0]
+	result.Kernel = strings.TrimSpace(strings.Split(structs["System Info"][3], ":")[1])
+	result.PodCIDR = structs["PodCIDR"][0]
+	result.PodCount, _ = strconv.Atoi(numb.FindAllStringSubmatch(structs["Non-terminated Pods"][0], -1)[0][0])
+	result.CreateTime, _ = time.Parse(time.RFC1123Z, structs["CreationTimestamp"][0])
+	result.Annotations = structs["Annotations"]
+	result.Labels = structs["Labels"]
+	for _, line := range structs["Conditions"] {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "Ready") {
+			result.Status = strings.Fields(line)[0]
+			break
+		}
+	}
+	for _, line := range structs["Addresses"] {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "Hostname") {
+			result.Hostname = strings.Fields(line)[1]
+			continue
+		}
+		if strings.HasPrefix(line, "InternalIP") {
+			result.Ip = strings.Fields(line)[1]
+			continue
+		}
+	}
+
+	result.CapacityCpu, _ = strconv.Atoi(numb.FindAllStringSubmatch(structs["Capacity"][0], -1)[0][0])
+	result.CapacityMemory, _ = strconv.Atoi(numb.FindAllStringSubmatch(structs["Capacity"][3], -1)[0][0])
+	result.CapacityMemory = result.CapacityMemory / 1024
+	result.CpuLimit, _ = strconv.Atoi(numb.FindAllStringSubmatch(structs["Allocated resources"][3], -1)[3][0])
+	result.MemoryLimit, _ = strconv.Atoi(numb.FindAllStringSubmatch(structs["Allocated resources"][4], -1)[3][0])
 	return result
 }
 

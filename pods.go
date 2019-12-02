@@ -2,6 +2,7 @@ package kubetool
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/wenlaizhou/middleware"
 	"strings"
@@ -173,4 +174,21 @@ func ExecPodContainer(cluster KubeCluster, pod string, ns string, containerName 
 		args = append(args, command...)
 	}
 	return KubeApi(cluster, args...)
+}
+
+// 获取该节点下的所有pod
+func GetPodsByNode(cluster KubeCluster, node string) (kubetype.PodList, error) {
+	// 	kubectl get po --field-selector='spec.nodeName=idc02-sre-kubernetes-04' --all-namespaces -o json
+	var result kubetype.PodList
+	if len(node) <= 0 {
+		return result, errors.New("node 为空")
+	}
+	args := []string{CmdGet, ArgsAllNamespaces, "-o", "json"}
+	args = append(args, fmt.Sprintf("--field-selector='spec.nodeName=%s'", node))
+	res, err := KubeApi(cluster, args...)
+	if err != nil {
+		return result, err
+	}
+	err = json.Unmarshal([]byte(res), &result)
+	return result, err
 }

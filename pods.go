@@ -183,7 +183,7 @@ func GetPodsByNode(cluster KubeCluster, node string) (kubetype.PodList, error) {
 	if len(node) <= 0 {
 		return result, errors.New("node 为空")
 	}
-	args := []string{CmdGet, ArgsAllNamespaces, "-o", "json"}
+	args := []string{CmdGet, "po", ArgsAllNamespaces, "-o", "json"}
 	args = append(args, fmt.Sprintf("--field-selector='spec.nodeName=%s'", node))
 	res, err := KubeApi(cluster, args...)
 	if err != nil {

@@ -100,7 +100,36 @@ func GetPods(clusterName string, ns string) map[string]kubetype.PodList {
 }
 
 // pod 查询
-func QueryPods(clusterName string, ns string, selector string) kubetype.PodList {
+func QueryPods(clusterName string, ns string, fieldSelector string) kubetype.PodList {
+	cluster := Cluster[clusterName]
+	var args []string
+	args = append(args, CmdGet)
+	args = append(args, "po")
+	args = append(args, "-o")
+	args = append(args, "json")
+	args = append(args, "-n")
+	if len(ns) <= 0 {
+		ns = "default"
+	}
+	args = append(args, ns)
+	if len(fieldSelector) > 0 {
+		args = append(args, fmt.Sprintf(fieldSelectorTpl, fieldSelector))
+	}
+	res := kubetype.PodList{}
+	cmdRes, err := KubeApi(cluster, args...)
+	if err != nil {
+		K8sLogger.ErrorF("cluster: %s get pods error : %s", err.Error())
+		return res
+	}
+	err = json.Unmarshal([]byte(cmdRes), &res)
+	if err != nil {
+		K8sLogger.ErrorF("cluster: %s get pods error : %s", err.Error())
+	}
+	return res
+}
+
+// pod 查询
+func QueryPodsByLabel(clusterName string, ns string, selector string) kubetype.PodList {
 	cluster := Cluster[clusterName]
 	var args []string
 	args = append(args, CmdGet)

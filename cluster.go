@@ -37,12 +37,12 @@ func init() {
 		middleware.Mkdir(confDir)
 		return
 	}
-	Init(confDir)
+	Init()
 }
 
 // 当前目录进行配置扫描
-func Init(confPath string) {
-	_ = filepath.Walk(confPath, walkPath)
+func Init() {
+	_ = filepath.Walk(confDir, walkPath)
 }
 
 // 动态新增集群

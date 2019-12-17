@@ -99,7 +99,8 @@ func GetPods(clusterName string, ns string) map[string]kubetype.PodList {
 	return res
 }
 
-// pod 查询
+// 根据pod属性进行数据查询
+// fieldSelector : k=v,k=v
 func QueryPods(clusterName string, ns string, fieldSelector string) kubetype.PodList {
 	cluster := Cluster[clusterName]
 	var args []string
@@ -107,11 +108,11 @@ func QueryPods(clusterName string, ns string, fieldSelector string) kubetype.Pod
 	args = append(args, "po")
 	args = append(args, "-o")
 	args = append(args, "json")
-	args = append(args, "-n")
-	if len(ns) <= 0 {
-		ns = "default"
+	if len(ns) > 0 {
+		args = append(args, "-n", ns)
+	} else {
+		args = append(args, ArgsAllNamespaces)
 	}
-	args = append(args, ns)
 	if len(fieldSelector) > 0 {
 		args = append(args, fmt.Sprintf(fieldSelectorTpl, fieldSelector))
 	}

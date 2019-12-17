@@ -26,7 +26,7 @@ const targetPort = "--target-port=%s"
 const name = "--name=%s"
 const externalIp = "--external-ip=%s"
 const selectorTpl = "-l %s"
-const fieldSelectorTpl = "--field-selector='%s'"
+const fieldSelectorTpl = "--field-selector=%s"
 
 // 对外发布服务
 //

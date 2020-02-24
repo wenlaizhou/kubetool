@@ -1,7 +1,9 @@
 package kubetool
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/wenlaizhou/kubetype"
 	"github.com/wenlaizhou/middleware"
 	"regexp"
 )
@@ -13,6 +15,67 @@ func Scale(cluster KubeCluster, resourceType string, name string, ns string, sca
 	args = append(args, fmt.Sprintf("%v/%v", resourceType, name))
 	args = append(args, "-n", ns)
 	return KubeApi(cluster, args...)
+}
+
+func ScalePodAddOne(cluster KubeCluster, name string, ns string) (string, error) {
+	podItem, err := GetPodItem(cluster, name, ns)
+	if err != nil {
+		return "", err
+	}
+	if len(podItem.ObjectMeta.OwnerReferences) <= 0 {
+		return "", err
+	}
+	owner := podItem.ObjectMeta.OwnerReferences[0]
+	rs := kubetype.ReplicaSet{}
+	// kubectl get rs flink-taskmanager-c474645f5 -o yaml
+	var args []string
+	args = append(args, "get")
+	args = append(args, owner.Kind)
+	args = append(args, owner.Name)
+	args = append(args, "-n")
+	args = append(args, ns)
+	args = append(args, "-o")
+	args = append(args, "json")
+	cmdRes, err := KubeApi(cluster, args...)
+	if err != nil {
+		K8sLogger.ErrorF("cluster: %s get pods error : %s", err.Error())
+		return "", err
+	}
+	err = json.Unmarshal([]byte(cmdRes), &rs)
+	newRs := rs.Status.Replicas + 1
+	return Scale(cluster, "rs", rs.Name, rs.Namespace, int(newRs))
+}
+
+func ScalePodSubOne(cluster KubeCluster, name string, ns string) (string, error) {
+	podItem, err := GetPodItem(cluster, name, ns)
+	if err != nil {
+		return "", err
+	}
+	if len(podItem.ObjectMeta.OwnerReferences) <= 0 {
+		return "", err
+	}
+	owner := podItem.ObjectMeta.OwnerReferences[0]
+	rs := kubetype.ReplicaSet{}
+	// kubectl get rs flink-taskmanager-c474645f5 -o yaml
+	var args []string
+	args = append(args, "get")
+	args = append(args, owner.Kind)
+	args = append(args, owner.Name)
+	args = append(args, "-n")
+	args = append(args, ns)
+	args = append(args, "-o")
+	args = append(args, "json")
+	cmdRes, err := KubeApi(cluster, args...)
+	if err != nil {
+		K8sLogger.ErrorF("cluster: %s get pods error : %s", err.Error())
+		return "", err
+	}
+	err = json.Unmarshal([]byte(cmdRes), &rs)
+	newRs := rs.Status.Replicas - 1
+	if newRs <= 0 {
+		return "", nil
+	}
+	return Scale(cluster, "rs", rs.Name, rs.Namespace, int(newRs))
 }
 
 const ExposeTypeClusterIP = "ClusterIP" // default

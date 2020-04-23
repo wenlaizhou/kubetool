@@ -8,6 +8,7 @@ import (
 )
 
 // 获取资源列表
+// ns : 传空, 为全部命名空间资源列表
 func GetResourceList(clusterName string, resourceName string, ns string) (interface{}, error) {
 	if len(resourceName) <= 0 {
 		return nil, errors.New("resourceName 为空")

@@ -116,7 +116,7 @@ func GetResourceList(clusterName string, resourceName string, ns string) (interf
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	case "cj":
-		resObj := kubetype.CronJob{}
+		resObj := kubetype.CronJobList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
 	}

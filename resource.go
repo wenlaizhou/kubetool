@@ -115,6 +115,10 @@ func GetResourceList(clusterName string, resourceName string, ns string) (interf
 		resObj := kubetype.RoleBindingList{}
 		err = json.Unmarshal([]byte(res), &resObj)
 		return resObj, err
+	case "cj":
+		resObj := kubetype.CronJob{}
+		err = json.Unmarshal([]byte(res), &resObj)
+		return resObj, err
 	}
 	return nil, errors.New(fmt.Sprintf("没有这种资源: %s", resourceName))
 }

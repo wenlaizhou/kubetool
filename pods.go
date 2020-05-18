@@ -158,6 +158,40 @@ func QueryPodsByLabel(clusterName string, ns string, selector string) kubetype.P
 	return res
 }
 
+func GetPodByIp(clusterName string, ip string) (kubetype.Pod, error) {
+	var res kubetype.Pod
+	cluster, hasCluster := Cluster[clusterName]
+	if !hasCluster {
+		return res, errors.New("cluster is unavailable")
+	}
+	var args []string
+	args = append(args, CmdGet)
+	args = append(args, "po")
+	args = append(args, ArgsAllNamespaces)
+	args = append(args, "-o")
+	args = append(args, "json")
+	cmdRes, err := KubeApi(cluster, args...)
+	if err != nil {
+		K8sLogger.ErrorF("cluster: %s get pods error : %s", err.Error())
+		return res, err
+	}
+	podList := kubetype.PodList{}
+	err = json.Unmarshal([]byte(cmdRes), &podList)
+	if err != nil {
+		K8sLogger.ErrorF("cluster: %s get pods error : %s", err.Error())
+		return res, err
+	}
+	if len(podList.Items) <= 0 {
+		return res, errors.New("cluster is unavailable")
+	}
+	for _, po := range podList.Items {
+		if po.Status.PodIP == ip {
+			return po, nil
+		}
+	}
+	return res, errors.New("not found")
+}
+
 // 获取pod配置信息
 func GetPod(cluster KubeCluster, pod string, ns string) (string, error) {
 	return KubeApi(cluster, "get", "po", pod, "-n", ns, "-o", "yaml")

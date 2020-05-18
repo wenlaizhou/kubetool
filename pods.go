@@ -186,6 +186,7 @@ func GetPodByIp(clusterName string, ip string) (kubetype.Pod, error) {
 	}
 	for _, po := range podList.Items {
 		if po.Status.PodIP == ip {
+			// todo 内存泄露风险
 			return po, nil
 		}
 	}

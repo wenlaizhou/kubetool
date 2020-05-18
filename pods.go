@@ -160,6 +160,10 @@ func QueryPodsByLabel(clusterName string, ns string, selector string) kubetype.P
 
 func GetPodByIp(clusterName string, ip string) (kubetype.Pod, error) {
 	var res kubetype.Pod
+	clusterName, ip = strings.TrimSpace(clusterName), strings.TrimSpace(ip)
+	if len(clusterName) <= 0 || len(ip) <= 0 {
+		return res, errors.New("参数不为空")
+	}
 	cluster, hasCluster := Cluster[clusterName]
 	if !hasCluster {
 		return res, errors.New("cluster is unavailable")

@@ -127,6 +127,14 @@ func GetResoureYaml(cluster KubeCluster, resourceName string, name string, names
 	return KubeApi(cluster, CmdGet, resourceName, name, ArgsNamespace, namespace, ArgsOutput, ArgsYml)
 }
 
+func CreateNs(clusterName string, ns string) (string, error) {
+	cluster, hasCluster := Cluster[clusterName]
+	if !hasCluster {
+		return "", errors.New("没有该集群")
+	}
+	return KubeApi(cluster, CmdCreate, "ns", ns)
+}
+
 func DescResource(cluster KubeCluster, resourceName string, name string, namespace string) (string, error) {
 	return KubeApi(cluster, CmdDesc, resourceName, name, ArgsNamespace, namespace)
 }

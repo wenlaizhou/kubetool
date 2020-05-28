@@ -229,7 +229,14 @@ func GetNodeStruct(clusterName string, name string) NodeDesc {
 	result.Name = n[0]
 	result.Cluster = clusterName
 	result.Kernel = strings.TrimSpace(strings.Split(structs["System Info"][3], ":")[1])
-	result.PodCIDR = structs["PodCIDR"][0]
+	n, hasN := structs["PodCIDR"]
+	if !hasN {
+		return NodeDesc{}
+	}
+	if len(n) <= 0 {
+		return NodeDesc{}
+	}
+	result.PodCIDR = n[0]
 	result.PodCount, _ = strconv.Atoi(numb.FindAllStringSubmatch(structs["Non-terminated Pods"][0], -1)[0][0])
 	result.CreateTime, _ = time.Parse(time.RFC1123Z, structs["CreationTimestamp"][0])
 	result.Annotations = structs["Annotations"]

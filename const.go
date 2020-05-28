@@ -58,6 +58,10 @@ const ArgsAllContainers = "--all-containers=true"
 const ArgsNamespace = "-n"
 const ArgsAllNamespaces = "--all-namespaces"
 
+// format
+const ArgsNoHeader = "--no-headers"
+const ArgsNoEvents = "--show-events=false"
+
 // output
 const ArgsOutput = "-o"
 const ArgsJson = "json"

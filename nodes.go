@@ -167,13 +167,13 @@ var memResourceReg = regexp.MustCompile("memory\\s+(\\w+)\\s+\\((\\w+)%?\\)\\s+(
 // }
 
 func GetNodesName(clusterName string) []string {
-	res, err := KubeApi(Cluster[clusterName], "get", "no")
+	res, err := KubeApi(Cluster[clusterName], CmdGet, "node", ArgsNoHeader)
 	if err != nil {
 		return nil
 	}
 	res = strings.TrimSpace(res)
 	var result []string
-	for _, line := range strings.Split(res, "\n")[1:] {
+	for _, line := range strings.Split(res, "\n") {
 		result = append(result, strings.Fields(strings.TrimSpace(line))[0])
 	}
 	return result

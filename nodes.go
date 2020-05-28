@@ -188,6 +188,10 @@ func GetNodeStruct(clusterName string, name string) NodeDesc {
 
 	desc = strings.TrimSpace(desc)
 
+	if strings.HasPrefix(desc, "Error") {
+		return NodeDesc{}
+	}
+
 	structs := make(map[string][]string)
 
 	currentKey := ""
@@ -215,8 +219,14 @@ func GetNodeStruct(clusterName string, name string) NodeDesc {
 	}
 
 	result := NodeDesc{}
-
-	result.Name = structs["Name"][0]
+	n, hasName := structs["Name"]
+	if !hasName {
+		return NodeDesc{}
+	}
+	if len(n) <= 0 {
+		return NodeDesc{}
+	}
+	result.Name = n[0]
 	result.Cluster = clusterName
 	result.Kernel = strings.TrimSpace(strings.Split(structs["System Info"][3], ":")[1])
 	result.PodCIDR = structs["PodCIDR"][0]

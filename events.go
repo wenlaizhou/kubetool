@@ -8,7 +8,7 @@ import (
 // 获取时间列表
 func GetEvents(cluster KubeCluster) (kubetype.EventList, error) {
 	resObj := kubetype.EventList{}
-	res, err := KubeApi(cluster, CmdGet, "events", ArgsOutput, ArgsJson)
+	res, err := KubeApi(cluster, CmdGet, "events", ArgsAllNamespaces, ArgsOutput, ArgsJson)
 	if err != nil {
 		return resObj, err
 	}

@@ -1,5 +1,6 @@
 package kubetool
 
+/*
 import (
 	"bytes"
 	"fmt"
@@ -579,3 +580,5 @@ func filterRuleOutput(rule string) string {
 
 	return out
 }
+
+*/
